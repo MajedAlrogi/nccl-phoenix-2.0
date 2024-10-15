@@ -36,6 +36,18 @@ extern char ncclLastError[];
 #define INFO(FLAGS, ...) ncclDebugLog(NCCL_LOG_INFO, (FLAGS), __func__, __LINE__, __VA_ARGS__)
 #define TRACE_CALL(...) ncclDebugLog(NCCL_LOG_TRACE, NCCL_CALL, __func__, __LINE__, __VA_ARGS__)
 
+/*
+The do { ... } while (0) pattern in LOG_MOD ensures that the macro behaves as a single, 
+syntactically correct statement regardless of where it's used in the code.
+
+This is important when using the macro inside control flow structures (e.g., if-else) to prevent logical errors.
+*/
+#define LOG_MOD(FLAGS, ...)                                                    \
+  do {                                                                         \
+    if (1)                                                                     \
+      ncclDebugLog(NCCL_LOG_MOD, (FLAGS), __func__, __LINE__, __VA_ARGS__);    \
+  } while (0)
+  
 #ifdef ENABLE_TRACE
 #define TRACE(FLAGS, ...) ncclDebugLog(NCCL_LOG_TRACE, (FLAGS), __func__, __LINE__, __VA_ARGS__)
 extern std::chrono::steady_clock::time_point ncclEpoch;

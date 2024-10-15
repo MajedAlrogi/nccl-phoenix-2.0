@@ -230,6 +230,9 @@ class Primitives<T, RedOp, Fan, Direct, ProtoLL, P2p>:
     T *srcElts = SrcBuf == -1 ? nullptr : userBufs[SrcBuf] + srcIx;
     T *dstElts = DstBuf == -1 ? nullptr : userBufs[DstBuf] + dstIx;
 
+    if (threadIdx.x == 0) {
+      printf("primitive ll generic op called! tid=%d\n", threadIdx.x);
+    }
     // Always waitSend in case of cleanup
     nelem = nelem < 0 ? 0 : nelem;
     if (SEND) waitSend(divUp(nelem, EltPerLine)*sizeof(ncclLLFifoLine));

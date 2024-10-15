@@ -237,7 +237,7 @@ ncclResult_t ncclIbInit(ncclDebugLogger_t logFunction) {
           // But allow it to be overloaded by an env parameter
           ncclIbDevs[ncclNIbDevs].ar = (portAttr.link_layer == IBV_LINK_LAYER_INFINIBAND) ? 1 : 0;
           if (ncclParamIbAdaptiveRouting() != -2) ncclIbDevs[ncclNIbDevs].ar = ncclParamIbAdaptiveRouting();
-
+          LOG_MOD(NCCL_MOD, "ncclIbAsyncThreadMain created");
           pthread_create(&ncclIbAsyncThread, NULL, ncclIbAsyncThreadMain, context);
           ncclSetThreadName(ncclIbAsyncThread, "NCCL IbAsync %2d", ncclNIbDevs);
           pthread_detach(ncclIbAsyncThread); // will not be pthread_join()'d
@@ -1155,6 +1155,7 @@ ncclResult_t ncclIbIsend(void* sendComm, void* data, int size, int tag, void* mh
     memset(reqs, 0, NCCL_NET_IB_MAX_RECVS*sizeof(struct ncclIbRequest*));
     comm->fifoHead++;
     TIME_STOP(0);
+    LOG_MOD(NCCL_MOD, "nccl ib isend success data=%p, size=%d", data, size);
     return ncclSuccess;
   }
 
@@ -1260,6 +1261,7 @@ ncclResult_t ncclIbIrecv(void* recvComm, int n, void** data, int* sizes, int* ta
   TIME_START(2);
   NCCLCHECK(ncclIbPostFifo(comm, n, data, sizes, tags, mhandles, req));
   TIME_STOP(2);
+  LOG_MOD(NCCL_MOD, "nccl ib irecv success nreq=%d, data=%p, size=%d", n,data[0], sizes[0]);
   return ncclSuccess;
 }
 
