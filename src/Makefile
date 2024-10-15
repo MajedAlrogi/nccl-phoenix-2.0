@@ -13,7 +13,8 @@ LIBSRCFILES := \
 	init.cc init_nvtx.cc net.cc proxy.cc transport.cc \
 	$(wildcard graph/*.cc) \
 	$(wildcard misc/*.cc) \
-	$(wildcard transport/*.cc)
+	$(wildcard transport/*.cc) \
+	$(wildcard emulator/*.cc)
 
 ##### lib files
 LIBNAME     := libnccl.so
