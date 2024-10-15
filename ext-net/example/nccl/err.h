@@ -11,6 +11,7 @@ typedef enum { ncclSuccess                 =  0,
                ncclSystemError             =  2,
                ncclInternalError           =  3,
                ncclInvalidArgument         =  4,
-               ncclRemoteError             =  6 } ncclResult_t;
+               ncclRemoteError             =  6,
+               ncclModError                =  9 } ncclResult_t;
 
 #endif
