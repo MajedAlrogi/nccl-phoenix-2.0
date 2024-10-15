@@ -29,6 +29,7 @@ namespace {
     Primitives<T, RedOp, FanSymmetric<1>, 1, Proto, 0> prims
       (tid, nthreads, &ring->prev, &ring->next, inputBuf, outputBuf, args->redOpArg);
 
+    int ringIx = ring->index;
     for (ssize_t gridOffset = 0; gridOffset < size; gridOffset += loopSize) {
       ssize_t realChunkSize;
       if (Proto::Id == NCCL_PROTO_SIMPLE) {
