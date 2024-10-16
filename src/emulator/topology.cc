@@ -66,3 +66,4 @@ ncclResult_t modTopologyDestroy(modTopology *topology) {
       (topoInitState)(topology->init ^ topoInitState::PER_CALL_INITED);
   LOG_MOD(NCCL_MOD, "modTopologyDestroy");
   return ncclSuccess;
+}
