@@ -650,7 +650,7 @@ static ncclResult_t collNetTrySetup(ncclComm_t comm, ncclComm_t parent, struct n
             NCCLCHECKGOTO(initCollnetChannel(comm, c, parent, true), ret, fail);
         }
       } else {
-        /* TODO: CX-6 and CX-7 both do not support multiple sharp resources per process, if child comm cannot
+        /* CX-6 and CX-7 both do not support multiple sharp resources per process, if child comm cannot
          * share the sharp resource from parent, we cannot use sharp in this case. This restriction might be
          * lifted by sharp plugin/IB hardware in the future. */
         collNetSetupFail = 1;
@@ -808,7 +808,8 @@ static ncclResult_t initTransportsRank(struct ncclComm* comm, struct ncclComm* p
     int typeIntra;
     int typeInter;
   };
-
+// TODO: i think the all gather struct is relevant to NCCL global graph generation.
+// (SEE STEP 2)
   struct allGatherInfo {
     struct graphInfo graphInfo[NCCL_NUM_ALGORITHMS];
     struct ncclTopoRanks topoRanks;
@@ -887,6 +888,8 @@ static ncclResult_t initTransportsRank(struct ncclComm* comm, struct ncclComm* p
     comm->intraBarrierCounter = 0;
     comm->intraBarrierGate = 0;
   } while(0);
+
+  // TODO STEP 1: GENERATE MULTIPLE TOPOLOGY GRAPHS FROM THE XML
 
   // Topo detection / System graph creation
   NCCLCHECKGOTO(ncclTopoGetSystem(comm, &comm->topo), ret, fail);
@@ -967,7 +970,7 @@ static ncclResult_t initTransportsRank(struct ncclComm* comm, struct ncclComm* p
     struct ncclTopoGraph* dumpGraphs[4] = { &ringGraph, &treeGraph, &collNetGraph, &nvlsGraph };
     NCCLCHECKGOTO(ncclTopoDumpGraphs(comm->topo, 4, dumpGraphs), ret, fail);
   }
-
+  
   // AllGather3 - begin
   NCCLCHECKGOTO(ncclCalloc(&allGather3Data, nranks), ret, fail);
 
@@ -985,7 +988,7 @@ static ncclResult_t initTransportsRank(struct ncclComm* comm, struct ncclComm* p
   NCCLCHECKGOTO(ncclTopoPreset(comm, graphs, &allGather3Data[rank].topoRanks), ret, fail);
 
   NCCLCHECKGOTO(bootstrapAllGather(comm->bootstrap, allGather3Data, sizeof(*allGather3Data)), ret, fail);
-
+  // TODO STEP 2: research how nNodes and allGather work with the code below to send the topologies
   // Determine nNodes, firstRanks, ...
   NCCLCHECKGOTO(ncclCalloc(&nodesFirstRank, nranks), ret, fail);
   NCCLCHECKGOTO(ncclCalloc(&nodesTreePatterns, nranks), ret, fail);
