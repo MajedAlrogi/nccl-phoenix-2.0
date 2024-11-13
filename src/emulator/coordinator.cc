@@ -8,6 +8,9 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string>
+#include <thread>
+#include <chrono>
+#include <iostream>
 using namespace std;
 
 static void calc_size_inkernel(int nelem, vector<int> &res) {
@@ -281,6 +284,8 @@ static void sendrecvInit(modCoordinator *coordinator, modTopology *topology) {
     LOG_MOD(
         NCCL_MOD, "sendrecv solved: sendrank=%d, recvrank=%d, ringmapsize=%lu",
         coordinator->sendrank, coordinator->recvrank, topology->ringmap.size());
+        std::cout << "This is where magic is happening." << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(5000));
     for (auto i : topology->myranks) {
       rankInit(coordinator, i);
     }
