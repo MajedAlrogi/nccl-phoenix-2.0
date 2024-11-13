@@ -13,6 +13,7 @@ using namespace std;
 int MOD_KERNEL_BYPASS = -1;
 int MOD_N_NODES = -1;
 int MOD_MY_NODE = -1;
+int MOD_N_TOPO_EMU_RANKS = 3; // TODO: make this an env var. emu_ranks +1 = nranks
 modCoordinator global_coordinator;
 modTopology global_topology;
 mutex emulator_lock;

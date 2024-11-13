@@ -23,7 +23,7 @@ ncclResult_t modTopologyInit(modTopology *topology, ncclProxyOp *proxyOp,
     if ((topology->init & topoInitState::META_INITED) == 0) {
 
       topology->nranks = nranks;
-      topology->nnodes = MOD_N_NODES; // should be set by application!
+      topology->nnodes = MOD_N_TOPO_EMU_RANKS; //MOD_N_NODES; // should be set by application!
       topology->nrankpernode = topology->nranks / topology->nnodes;
       assert(topology->nranks % topology->nnodes == 0);
       topology->init =
@@ -48,7 +48,7 @@ ncclResult_t modTopologyUpdateMap(modTopology *topology, int rank, int channel,
   topology->ringmap[make_pair(rank, channel)] = ring->index;
 
   if (rank == 0) {
-    for (int i = 1; i < nranks; ++i) {
+    for (int i = 0; i < nranks; ++i) { // TODO: BECAREFUL! i should start from 1 if ori exists. it should be nranks-1 if ori does not exist.
       topology->ringmap[make_pair(i, channel)] = ringranks[i];
       LOG_MOD(NCCL_MOD, "update ringmap rk%d ringidx%d ch%d", i,
               topology->ringmap[make_pair(i, channel)], channel);
