@@ -25,6 +25,7 @@ struct modController;
 extern int MOD_KERNEL_BYPASS;
 extern int MOD_N_NODES;
 extern int MOD_MY_NODE;
+extern int MOD_N_TOPO_EMU_RANKS;
 extern modCoordinator global_coordinator;
 extern modTopology global_topology;
 extern modController global_controller;
