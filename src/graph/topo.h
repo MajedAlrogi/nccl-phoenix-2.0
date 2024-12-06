@@ -219,4 +219,7 @@ static int mirrorBits(int val, int pow2) {
   for (int b=1, mb=(pow2>>1); b<pow2; b<<=1, mb>>=1) if (val & b) mirror |= mb;
   return mirror;
 }
+
+ncclResult_t ncclTopoLoadFromXml(ncclComm_t comm, const char* xmlFile, struct ncclTopoSystem** system);
+
 #endif

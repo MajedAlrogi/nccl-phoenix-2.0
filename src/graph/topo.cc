@@ -627,6 +627,12 @@ static ncclResult_t xmlInitAttrFloat(struct ncclXmlNode* node, const char* attrN
 
 
 ncclResult_t ncclTopoGetSystem(struct ncclComm* comm, struct ncclTopoSystem** system) {
+  
+    if (getenv("NCCL_TOPO_FILE")) {
+    // Return empty system, we'll load from XML
+    NCCLCHECK(ncclCalloc(system, 1));
+    return ncclSuccess;
+ }
   struct ncclXml* xml;
   NCCLCHECK(ncclCalloc(&xml, 1));
   const char* xmlTopoFile = ncclGetEnv("NCCL_TOPO_FILE");
@@ -876,5 +882,26 @@ ncclResult_t ncclTopoGetCompCap(struct ncclTopoSystem* system, int* ccMin, int* 
   }
   if (ccMin) *ccMin = min;
   if (ccMax) *ccMax = max;
+  return ncclSuccess;
+}
+
+ncclResult_t ncclTopoLoadFromXml(ncclComm_t comm, const char* xmlFile, struct ncclTopoSystem** system) {
+  struct ncclXml xml;
+  NCCLCHECK(ncclTopoGetXmlFromFile(xmlFile, &xml, 1));
+  
+  // Create new topology system
+  NCCLCHECK(ncclCalloc(system, 1));
+  
+  // Parse XML and populate topology
+  struct ncclXmlNode* topologyNode = NULL;
+  NCCLCHECK(xmlFindTag(&xml, "topology", &topologyNode));
+  if (!topologyNode) {
+    WARN("Could not find topology node in XML file %s", xmlFile);
+    return ncclInternalError;
+  }
+  
+  // Parse the XML structure into the topology system
+  NCCLCHECK(ncclTopoXmlLoadSystem(topologyNode, *system));
+  
   return ncclSuccess;
 }

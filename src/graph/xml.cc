@@ -271,6 +271,15 @@ ncclResult_t ncclTopoXmlLoadNet(FILE* file, struct ncclXml* xml, struct ncclXmlN
 }
 
 ncclResult_t ncclTopoXmlLoadNic(FILE* file, struct ncclXml* xml, struct ncclXmlNode* head) {
+  if (strcmp(node->name, "nic") == 0) {
+   if (getenv("NCCL_TOPO_FILE")) {
+     // Handle emulated NICs
+     struct ncclTopoNode* nicNode;
+     NCCLCHECK(ncclTopoNodeCreate(topo, &nicNode, NCCL_TOPO_NODE_NIC));
+     nicNode->id = attrValueInt("id", node);
+     return ncclSuccess;
+  }
+}
   struct xmlHandler handlers[] = { { "net", ncclTopoXmlLoadNet } };
   NCCLCHECK(xmlLoadSub(file, xml, head, handlers, 1));
   return ncclSuccess;
@@ -446,6 +455,13 @@ ncclResult_t ncclTopoGetXmlFromCpu(struct ncclXmlNode* cpuNode, struct ncclXml* 
 }
 
 ncclResult_t ncclTopoGetPciNode(struct ncclXml* xml, const char* busId, struct ncclXmlNode** pciNode) {
+  if (strstr(busid, "EMU:")) {  // Handle emulated GPUs
+  pci->domain = 0x0000;
+  pci->bus = 0x00;
+  pci->dev = 0x00;
+  pci->func = 0x0;
+  return ncclSuccess;  // Skip real PCI checks
+}
   NCCLCHECK(xmlFindTagKv(xml, "pci", pciNode, "busid", busId));
   if (*pciNode == NULL) {
     NCCLCHECK(xmlAddNode(xml, NULL, "pci", pciNode));

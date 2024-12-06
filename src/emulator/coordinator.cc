@@ -251,6 +251,14 @@ static void metaInit(modCoordinator *coordinator, ncclProxyOp *proxyOp,
 }
 
 static void sendrecvInit(modCoordinator *coordinator, modTopology *topology) {
+  if (MOD_KERNEL_BYPASS == 1) {
+        // Get XML file path from environment variable
+        const char* topoFile = getenv("NCCL_TOPO_FILE");
+        if (topoFile) {
+            loadTopoFromXml(topology, topoFile);
+        }
+    }
+
   LOG_MOD(NCCL_MOD, "sendrecvInit, myranks.size=%lu, nrankpernode=%d",
           topology->myranks.size(), topology->nrankpernode);
   if (topology->myranks.size() < topology->nrankpernode) {
@@ -365,4 +373,54 @@ ncclResult_t modCoordinatorRecv(modCoordinator *coordinator, int cid,
   LOG_MOD(NCCL_MOD, "modCoordinatorRecv: size=%d, recvtail=%d", size,
           ch.recvtail);
   return ncclSuccess;
+}
+
+static ncclResult_t loadTopoFromXml(modTopology* topology, const char* xmlFile) {
+    struct ncclXml xml;
+    // Load XML file
+    NCCLCHECK(ncclTopoGetXmlFromFile(xmlFile, &xml, 1));
+
+    // Find topology node
+    struct ncclXmlNode* topologyNode = NULL;
+    NCCLCHECK(xmlFindTag(&xml, "topology", &topologyNode));
+    if (!topologyNode) {
+        WARN("Could not find topology node in XML file %s", xmlFile);
+        return ncclInternalError;
+    }
+
+    // Parse ranks
+    struct ncclXmlNode* ranksNode = NULL;
+    NCCLCHECK(xmlGetSub(topologyNode, "ranks", &ranksNode));
+    if (ranksNode) {
+        for (int r = 0; r < ranksNode->nSubs; r++) {
+            struct ncclXmlNode* rankNode = ranksNode->subs[r];
+            if (strcmp(rankNode->name, "rank") == 0) {
+                int rank;
+                NCCLCHECK(xmlGetAttrInt(rankNode, "id", &rank));
+                topology->myranks.push_back(rank);
+            }
+        }
+    }
+
+    // Parse ring connections
+    struct ncclXmlNode* ringsNode = NULL;
+    NCCLCHECK(xmlGetSub(topologyNode, "rings", &ringsNode));
+    if (ringsNode) {
+        for (int c = 0; c < ringsNode->nSubs; c++) {
+            struct ncclXmlNode* connNode = ringsNode->subs[c];
+            if (strcmp(connNode->name, "connection") == 0) {
+                int from, to, channel;
+                NCCLCHECK(xmlGetAttrInt(connNode, "from", &from));
+                NCCLCHECK(xmlGetAttrInt(connNode, "to", &to));
+                NCCLCHECK(xmlGetAttrInt(connNode, "channel", &channel));
+                
+                // Update topology maps
+                topology->next[from] = to;
+                topology->prev[to] = from;
+                topology->ringmap[make_pair(from, channel)] = c;
+            }
+        }
+    }
+
+    return ncclSuccess;
 }

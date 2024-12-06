@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<system version="1">
+  
+  <!-- Real Node (ori) -->
+  <node id="0" name="ori">
+    <gpu id="0" busid="0000:XX:XX.X"/>  <!-- Real GPU 0 -->
+    <gpu id="1" busid="0000:YY:YY.Y"/>  <!-- Real GPU 1 -->
+    <nic id="0" speed="100">  <!-- Physical NIC -->
+      <port guid="0x1" ib="false"/>
+    </nic>
+  </node>
+
+  <!-- Emulated Node (emu) -->
+  <node id="1" name="emu">
+    <!-- Emulated GPUs (4 ranks in this example) -->
+    <gpu id="2" busid="EMU:0000:00:00.0"/>
+    <gpu id="3" busid="EMU:0000:00:00.1"/>
+    <gpu id="4" busid="EMU:0000:00:00.2"/>
+    <gpu id="5" busid="EMU:0000:00:00.3"/>
+    
+    <!-- Virtual NIC connecting back to ori -->
+    <nic id="1" speed="10">  <!-- Emulated slower link -->
+      <port guid="0x2" ib="false"/>
+      <remoteNic guid="0x1"/>  <!-- Connect to ori's NIC -->
+    </nic>
+  </node>
+
+</system>

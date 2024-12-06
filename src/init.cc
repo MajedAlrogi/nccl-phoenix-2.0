@@ -892,17 +892,21 @@ static ncclResult_t initTransportsRank(struct ncclComm* comm, struct ncclComm* p
   // TODO STEP 1: GENERATE MULTIPLE TOPOLOGY GRAPHS FROM THE XML
 
   // Topo detection / System graph creation
-  NCCLCHECKGOTO(ncclTopoGetSystem(comm, &comm->topo), ret, fail);
-  // Compute paths between GPUs and NICs
-  NCCLCHECKGOTO(ncclTopoComputePaths(comm->topo, comm), ret, fail);
-  // Remove inaccessible GPUs and unused NICs
-  NCCLCHECKGOTO(ncclTopoTrimSystem(comm->topo, comm), ret, fail);
-  // Recompute paths after trimming
-  NCCLCHECKGOTO(ncclTopoComputePaths(comm->topo, comm), ret, fail);
-  // Init search
-  NCCLCHECKGOTO(ncclTopoSearchInit(comm->topo), ret, fail);
-  // Print final topology
-  NCCLCHECKGOTO(ncclTopoPrint(comm->topo), ret, fail);
+// Replace with:
+const char* topoFile = getenv("NCCL_TOPO_FILE");
+if (topoFile) {
+  INFO(NCCL_INIT, "EMU MODE: Loading topology from %s", topoFile);
+  NCCLCHECKGOTO(ncclTopoLoadFromXml(comm, topoFile, &comm->topo), ret, fail);
+} else {
+  WARN("EMU MODE: NCCL_TOPO_FILE not set");
+  ret = ncclInvalidUsage;
+  goto fail;
+}
+
+
+  // NCCLCHECKGOTO(ncclTopoComputePaths(comm->topo, comm), ret, fail);
+  // NCCLCHECKGOTO(ncclTopoSearchInit(comm->topo), ret, fail);
+  // NCCLCHECKGOTO(ncclTopoPrint(comm->topo), ret, fail);
 
   // Set Affinity to a CPU local the our GPU, so that all memory we allocate
   // on the host is local.
@@ -1366,7 +1370,7 @@ fail:
   goto exit;
 }
 
-static ncclResult_t ncclCommInitRankFunc(struct ncclAsyncJob* job_) {
+// static ncclResult_t ncclCommInitRankFunc(struct ncclAsyncJob* job_) {
   LOG_MOD(NCCL_MOD, "nccl comm init rank func");
   NCCLCHECK(modGetAllEnvVars());
 
