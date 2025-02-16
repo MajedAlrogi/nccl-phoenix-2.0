@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<system version="1">
+  
+  <!-- (ori) on mcnode34 -->
+  <node id="0" name="mcnode34">
+    <gpu id="0" busid="0000:XX:XX.X"/>  
+    <nic id="0" speed="100">  
+      <port guid="98039B8F4160" ib="false"/>  
+    </nic>
+  </node>
+
+  <!-- (emu) on mcnode37 -->
+  <node id="1" name="mcnode37">
+    <gpu id="1" busid="EMU:0000:00:00.0"/>
+    <gpu id="2" busid="EMU:0000:00:00.1"/>
+    <gpu id="3" busid="EMU:0000:00:00.2"/>
+    <gpu id="4" busid="EMU:0000:00:00.3"/>
+    
+    <nic id="1" speed="10">  
+      <port guid="98039B8EC818" ib="false"/>  
+      <remoteNic guid="98039B8F4160"/>  
+    </nic>
+  </node>
+
+</system>
