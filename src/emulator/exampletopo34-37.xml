@@ -3,7 +3,7 @@
   
   <!-- (ori) on mcnode34 -->
   <node id="0" name="mcnode34">
-    <gpu id="0" busid="0000:XX:XX.X"/>  
+    <gpu id="0" busid="0000:XX:XX.X"/>  <!-- put real busid here -->
     <nic id="0" speed="100">  
       <port guid="98039B8F4160" ib="false"/>  
     </nic>
